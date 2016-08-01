@@ -1,0 +1,41 @@
+Readme 
+
+Data similar to that used for http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html
+But the excel files were cleaner and easier to parse.  This is a decent data exploration tool, but doesn't tell much of a story. 
+http://apps.who.int/gho/data/node.main.1097?lang=en
+
+UNICEF had better datasets, despite being in Excel.
+
+UNICEF report: 
+http://data.unicef.org/corecode/uploads/document6/uploaded_pdfs/corecode/JME-2015-edition-Sept-2015_203.pdf
+This is a story, but .pdfs are static and take effort for humans to read. The two should work together. These infographics are trying to be user friendly, but no reason to dumb things down this much - most of the real data is obscured by the graphics.
+
+Global nutrition report: 
+http://ebrary.ifpri.org/utils/getfile/collection/p15738coll2/id/130354/filename/130565.pdf
+
+Had to reinstall node and npm, since some dependencies were borked
+http://stackoverflow.com/questions/11177954/how-do-i-completely-uninstall-node-js-and-reinstall-from-beginning-mac-os-x
+
+
+Creating Geo/TopoJson files 
+
+http://www.tnoda.com/blog/2013-12-07
+
+Convert shape file to GeoJSON and remove antarctica 
+
+ne_50m_admin_0_countries_lakes andrewpederson$ ogr2ogr -f GeoJSON -where "su_a3 <> 'ATA'" countries_not_ata.json ne_50m_admin_0_countries_lakes.shp
+
+Convert GEOJson to topojson
+topojson --projection 'd3.geo.mercator()' -p admin=name -p geometry=geometry -p id=iso_a3 -o world.topo.json countries_not_ata.json 
+
+--id-property +iso_a3
+
+topojson -p admin=name -p geometry=geometry -p id=iso_a3 -o worldtopo.json countries_not_ata.json
+
+
+Used Rich Donohue's code as inspiration: 
+http://bl.ocks.org/rgdonohue/9280446
+
+His Json was made for an Eckert projection, so had to be redone: 
+https://raw.githubusercontent.com/rgdonohue/d3-animated-world/master/data/world-topo.json
+

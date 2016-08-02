@@ -39,3 +39,6 @@ http://bl.ocks.org/rgdonohue/9280446
 His Json was made for an Eckert projection, so had to be redone: 
 https://raw.githubusercontent.com/rgdonohue/d3-animated-world/master/data/world-topo.json
 
+Keeping old values when transitioning
+
+http://jsfiddle.net/phfmz16o/2/

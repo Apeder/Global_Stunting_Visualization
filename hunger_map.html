@@ -74,8 +74,6 @@
 	  	
 		  	var projection = d3.geoMercator()
 		  							.scale(200) 
-		  							// .scale(320)
-		  							// .center([0,0])
 		  							.translate([width / 2.2, height / 1.9])
 		  							.precision(.1);
 
@@ -84,15 +82,6 @@
 		  	svg = d3.select("#map").append("svg")
 		  		.attr("width", width)
 		  		.attr("height", height);
-		  	
-		  	// svg.append("defs").append("path")
-		  	// 	.datum({type: "Sphere"})
-		  	// 	.attr("id", "sphere")
-		  	// 	.attr("d", path);
-
-		  	// svg.append("use")
-		  	// 	.attr("class", "stroke")
-		  	// 	.attr("xlink:href", "#sphere");
 
 		  	loadData();
 
@@ -101,7 +90,6 @@
 	  	function loadData() {
 	  
 	  		queue()
-	  			// .defer(d3.json, "map_test.json")
 	  			.defer(d3.json, "worldtopo.json")
 	  			.defer(d3.csv, "Data/clean_analysis/world_stunting.csv")
 	  			.await(processData);
@@ -115,7 +103,7 @@
 	  					countries[i].properties.matched = true
 	  					// console.log(world_info[j].ISO_country, j, i)
 	  					for(var k in world_info[j]) {
-	  						if(k != 'ISO_country' && k != 'name') {
+	  						if(k != 'ISO_country') {
 	  							if(attributeArray.indexOf(k) == -1) {
 	  								attributeArray.push(k)
 	  							}
@@ -130,7 +118,8 @@
 	  					countries[i].properties[k] = 0
 	  				}
 	  			}
-	  		}
+	  					}
+	  				
 	  		d3.select('#clock').html(attributeArray[currentAttribute]);
 	  		map_data(globe);	
 	  	}
@@ -154,18 +143,38 @@
 	  	function sequenceMap() {
 
 	  		var dataRange = getDataRange();
+
 	  		d3.selectAll('.country').transition()
 	  								.duration(700)
+	  								.style("color", "green")
 	  								.attr('fill-opacity', function(d) {
-	  									return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
-	  								});
+	  									if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
+	  										return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
+	  									}
+	  									else {
+	  										for(var i=attributeArray.length; i--;) {
+	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >=1983 && attributeArray[i] <=attributeArray[currentAttribute]) {
+	  												return getColor(d.properties[attributeArray[i]], dataRange);
+	  										}
+	  										// j = 0
+	  										// if(d.properties[attributeArray[i]]=0) {
+	  										// 	j +=1
+	  										// }
+	  										// if(d[j] = 32) {
+	  										// 	return getColor(0, dataRange)
+	  										// }
+	  									}
+	  								}
+	  							});
+
+	  		console.log(svg.selectAll('.country'))
 	  	}
-	  	
+
 	  	function getColor(valueIn, valuesIn) {
 
 	  		var color = d3.scaleLinear()
 		  		.domain([valuesIn[0],valuesIn[1]])
-		  		.range([0, .8]);
+		  		.range([0, 1]);
 
 		  	return color(valueIn);
 	  	}
@@ -212,14 +221,6 @@
 	  	} 
 
 	  	window.onload = init();
-
-// var color = d3.scaleLinear()
-// 		  		.domain([0,73.6])
-// 		  		.range("lightBlue", "red")
-// .style('fill', function(d) {
-// 	  				 	return color(d.values['stunting']);})
-
-// 	  	var format = d3.timeFormat("%Y");
 
   </script>
 </body>

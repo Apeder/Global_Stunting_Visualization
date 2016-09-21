@@ -30,7 +30,7 @@
 	  	stroke-width: .5px;
 	  }
 	  .country {
-	  	fill: green;
+	  	fill: red;
 	  	stroke: white;
 	  }
 	  #play, #clock {
@@ -118,8 +118,8 @@
 	  					countries[i].properties[k] = 0
 	  				}
 	  			}
-	  					}
-	  				
+	  		}
+	  		// console.log(countries)		
 	  		d3.select('#clock').html(attributeArray[currentAttribute]);
 	  		map_data(globe);	
 	  	}
@@ -133,29 +133,39 @@
 	  			.attr("id", function(d) { return "code_" +d.properties.id; }, true)
 	  			.attr('d', path);
 
-	  		var dataRange = getDataRange();
+	  		var dataRange = [0,100] 
+	  		// var dataRange = getDataRange();
+	  		
 	  		d3.selectAll('.country')
 	  			.attr('fill-opacity', function(d) {
-	  				return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
+	  				if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
+	  					return getColor(d.properties[attributeArray[currentAttribute]], dataRange)}
+	  				else {
+	  					return 0
+	  				}
 	  			});	
 	  	}
 
 	  	function sequenceMap() {
 
-	  		var dataRange = getDataRange();
+	  		var dataRange = [0,100] 
+	  		// var dataRange = getDataRange();
 
-	  		d3.selectAll('.country').transition()
+	  		d3.selectAll('.country').filter(function(d) {return d.properties[attributeArray[currentAttribute]] != 0})
+	  								.transition()
 	  								.duration(700)
-	  								.style("color", "green")
+	  								// .style("color", "red")
 	  								.attr('fill-opacity', function(d) {
-	  									if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
-	  										return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
-	  									}
-	  									else {
+	  									// if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
+	  									// 	return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
+	  									// }
+	  									// else {
 	  										for(var i=attributeArray.length; i--;) {
 	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >=1983 && attributeArray[i] <=attributeArray[currentAttribute]) {
-	  												return getColor(d.properties[attributeArray[i]], dataRange);
-	  										}
+	  												return getColor(d.properties[attributeArray[i]], dataRange)}
+	  											// else {
+	  											// 	return 0};
+	  										
 	  										// j = 0
 	  										// if(d.properties[attributeArray[i]]=0) {
 	  										// 	j +=1
@@ -163,11 +173,11 @@
 	  										// if(d[j] = 32) {
 	  										// 	return getColor(0, dataRange)
 	  										// }
-	  									}
+	  									// }
 	  								}
 	  							});
 
-	  		console.log(svg.selectAll('.country'))
+	  		// console.log(svg.selectAll('.country'))
 	  	}
 
 	  	function getColor(valueIn, valuesIn) {
@@ -178,21 +188,22 @@
 
 		  	return color(valueIn);
 	  	}
-	  	function getDataRange() {
+	  	
+	  	// function getDataRange() {
 
-	  		var min = Infinity, max = -Infinity;
-	  		d3.selectAll('.country')
-	  			.each(function(d,i) {
-	  				var currentValue = d.properties[attributeArray[currentAttribute]];
-	  				if(currentValue <= min && currentValue != -99 && currentValue != 'undefined') {
-	  					min = currentValue;
-	  				}
-	  			if(currentValue >= max && currentValue != -99 && currentValue != 'undefined') {
-	  				max = currentValue;
-	  			}
-	  		});
-	  		return [min,max];
-	  	}
+	  	// 	var min = Infinity, max = -Infinity;
+	  	// 	d3.selectAll('.country')
+	  	// 		.each(function(d,i) {
+	  	// 			var currentValue = d.properties[attributeArray[currentAttribute]];
+	  	// 			if(currentValue <= min && currentValue != -99 && currentValue != 'undefined') {
+	  	// 				min = currentValue;
+	  	// 			}
+	  	// 		if(currentValue >= max && currentValue != -99 && currentValue != 'undefined') {
+	  	// 			max = currentValue;
+	  	// 		}
+	  	// 	});
+	  	// 	return [min,max];
+	  	// }
 	  	
 	  	function animateMap() {
 

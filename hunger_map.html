@@ -2,11 +2,11 @@
 <html lang="en">
   <head>
 	<meta charset="utf-8">
-	<title>Choropleth Madness</title>
+	<title>Global Stunting, Children under Five</title>
 	  <style>
 	  #wrapper {
 	  	width: 1200px;
-	  	margin: -50px auto 0;
+	  	margin: -20px auto 0;
 	  }
 	  #map {
 	  	width: 1000px;
@@ -38,26 +38,55 @@
 	  	top: 15px;
 	  }
 	  #play {
-	  	left: 15px;
+	  	left: 175px;
+    	border: none;
+    	border-radius: 12px;
+    	color: white;
+    	background-color: #FF0000;
+    	opacity: .75;
+    	padding: 15px 32px;
+    	text-align: center;
+    	text-decoration: none;
+    	font: helvetica;
+    	display: inline-block;
+    	font-size: 22px;
 	  }
 	  #clock {
-	  	left: 65px;
+	  	left: 300px;
+	  	font: helvetica;
+	  	font-size: 60px;
+	  	opacity: .5;
 	  }
+	  div.tooltip {	
+	    position: absolute;			
+	    text-align: center;			
+	    width: 75px;										
+	    padding: 2px;				
+	    font: 12px sans-serif;		
+	    color: white;
+	    background: grey;
+	    opacity: .9;	
+	    border: 0px;		
+	    border-radius: 8px;			
+	    pointer-events: none;			
+		}
+    	.hidden {
+        display: none;
+    	}
 	  </style>
 	</head>
 
 	<body>
 		<div id="wrapper">
 			<div id="map"></div>
-			<button id="play">play</button>
-			<span id="clock">year</span>
+			<button id="play">Play</button>
+			<span id="clock">Year</span>
 		</div>
 
 	  <script src="http://d3js.org/d3.v4.min.js"></script>
-	  <script src="https://d3js.org/d3-scale.v1.min.js"></script>
-	  <script src="https://d3js.org/d3-geo-projection.v1.min.js"></script>
 	  <script src="https://d3js.org/queue.v1.min.js"></script>
 	  <script src="https://d3js.org/topojson.v1.min.js"></script>
+	  <script src="./d3-legend.min.js"></script>
 	  <script type="text/javascript">
 	  	
 	  	var width, height, attributeArray = [], projection, currentAttribute = 0, playing = false, path, svg;
@@ -82,6 +111,23 @@
 		  	svg = d3.select("#map").append("svg")
 		  		.attr("width", width)
 		  		.attr("height", height);
+
+		  	var linear = d3.scaleLinear()
+  				.domain([0,75])
+  				.range(["rgb(255, 255, 255)", "rgb(255, 0, 0)"]);
+
+			svg.append("g")
+  				.attr("class", "legendLinear")
+  				.attr("transform", "translate(250,508)");
+
+			var legendLinear = d3.legendColor()
+  				.shapeWidth(45)
+  				.cells(15)
+  				.orient('horizontal')
+  				.scale(linear);
+
+			svg.select(".legendLinear")
+  				.call(legendLinear);
 
 		  	loadData();
 
@@ -113,12 +159,13 @@
 	  					break;
 	  				}
 	  			}
-	  			if (!countries[i].properties.matched) {
-	  				for (var k in world_info[1]) {
-	  					countries[i].properties[k] = 0
-	  				}
-	  			}
 	  		}
+	  		
+	  		for(i=countries.length; i--;) {
+		  		if (!countries[i].properties.matched) {
+		  				countries.splice(i,1)
+		  				}
+		  		}
 	  		// console.log(countries)		
 	  		d3.select('#clock').html(attributeArray[currentAttribute]);
 	  		map_data(globe);	
@@ -126,57 +173,75 @@
 
 	  	function map_data(globe) {
 
-	  		svg.selectAll(".country")
+		  	// Define the div for the tooltip
+			// var tooltip = d3.select("body").append("div")	
+			//     .attr("class", "tooltip")				
+			//     .style("opacity", 0);
+
+			var tooltip = d3.select('body').append('div')
+            	.attr('class', 'hidden tooltip');
+
+	  		svg.selectAll(".country").filter(function(d) {return d.properties.matched=true})
 	  			.data(topojson.feature(globe, globe.objects.countries_not_ata).features)
 	  			.enter().append("path")
 	  			.attr("class", "country")
 	  			.attr("id", function(d) { return "code_" +d.properties.id; }, true)
-	  			.attr('d', path);
+	  			.attr('d', path)
+	  			.on('mousemove', function(d) {
+                    var mouse = d3.mouse(svg.node()).map(function(d) {
+                        return parseInt(d);
+                    });
+                    tooltip.classed('hidden', false)
+                        .attr('style', 'left:' + (mouse[0] + 120) + 'px; top:' + (mouse[1] - 40) + 'px')
+                        .html(function() {
+                        	var name = d.properties.admin;
+                        	years = []
+                        	for(var i in attributeArray) {
+                        		if(d.properties[attributeArray[i]] !=0) {
+                        			years.push("<br>", attributeArray[i], d.properties[attributeArray[i]], "%")
+                        		}
+                        	}
+                        	return name + years.join(" ")
+                        })
+                })
+                .on('mouseout', function() {
+                    tooltip.classed('hidden', true);
+	  			});	
+         
+	  		var dataRange = [0,75] 
 
-	  		var dataRange = [0,100] 
-	  		// var dataRange = getDataRange();
-	  		
 	  		d3.selectAll('.country')
 	  			.attr('fill-opacity', function(d) {
-	  				if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
+	  				if(d.properties[attributeArray[currentAttribute]] != 0) {
 	  					return getColor(d.properties[attributeArray[currentAttribute]], dataRange)}
 	  				else {
 	  					return 0
 	  				}
-	  			});	
-	  	}
-
+	  			});
+	  		}	
+	  	
 	  	function sequenceMap() {
 
-	  		var dataRange = [0,100] 
-	  		// var dataRange = getDataRange();
+	  		var dataRange = [0,75] 
 
 	  		d3.selectAll('.country').filter(function(d) {return d.properties[attributeArray[currentAttribute]] != 0})
 	  								.transition()
-	  								.duration(700)
-	  								// .style("color", "red")
+	  								.duration(800)
 	  								.attr('fill-opacity', function(d) {
-	  									// if(d.properties[attributeArray[currentAttribute]] != 0 || d.properties.matched==false) {
-	  									// 	return getColor(d.properties[attributeArray[currentAttribute]], dataRange);
-	  									// }
-	  									// else {
 	  										for(var i=attributeArray.length; i--;) {
-	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >=1983 && attributeArray[i] <=attributeArray[currentAttribute]) {
+	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >= 1983 && attributeArray[i] <= attributeArray[currentAttribute]) {
 	  												return getColor(d.properties[attributeArray[i]], dataRange)}
-	  											// else {
-	  											// 	return 0};
-	  										
-	  										// j = 0
-	  										// if(d.properties[attributeArray[i]]=0) {
-	  										// 	j +=1
-	  										// }
-	  										// if(d[j] = 32) {
-	  										// 	return getColor(0, dataRange)
-	  										// }
-	  									// }
 	  								}
+	  								// if(attributeArray[currentAttribute] == 1983) {
+	  								// 	if(d.properties[attributeArray[currentAttribute]] !=0) {
+	  								// 		return getColor(d.properties[attributeArray[currentAttribute]], dataRange)
+	  								// 	}
+	  								// 	else {
+	  								// 		return 0
+	  								// 	}
+	  								// }
 	  							});
-
+	  							
 	  		// console.log(svg.selectAll('.country'))
 	  	}
 
@@ -188,22 +253,6 @@
 
 		  	return color(valueIn);
 	  	}
-	  	
-	  	// function getDataRange() {
-
-	  	// 	var min = Infinity, max = -Infinity;
-	  	// 	d3.selectAll('.country')
-	  	// 		.each(function(d,i) {
-	  	// 			var currentValue = d.properties[attributeArray[currentAttribute]];
-	  	// 			if(currentValue <= min && currentValue != -99 && currentValue != 'undefined') {
-	  	// 				min = currentValue;
-	  	// 			}
-	  	// 		if(currentValue >= max && currentValue != -99 && currentValue != 'undefined') {
-	  	// 			max = currentValue;
-	  	// 		}
-	  	// 	});
-	  	// 	return [min,max];
-	  	// }
 	  	
 	  	function animateMap() {
 
@@ -221,13 +270,14 @@
 	  						d3.select('#clock').html(attributeArray[currentAttribute]);
 	  					}, 2000);
 
-	  					d3.select(this).html('stop');
+	  					d3.select(this).html('Stop');
 	  					playing = true;
 	  				} else {
 	  					clearInterval(timer);
-	  					d3.select(this).html('play');
+	  					d3.select(this).html('Play');
 	  					playing = false;
 	  				}
+
 	  			});
 	  	} 
 

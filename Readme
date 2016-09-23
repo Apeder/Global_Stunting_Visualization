@@ -42,3 +42,8 @@ https://raw.githubusercontent.com/rgdonohue/d3-animated-world/master/data/world-
 Keeping old values when transitioning
 
 http://jsfiddle.net/phfmz16o/2/
+
+For the legend, this script greatly simplified things: http://d3-legend.susielu.com/
+
+Used this as a template for tooltips: 
+http://bl.ocks.org/lhoworko/7753a11efc189a936371

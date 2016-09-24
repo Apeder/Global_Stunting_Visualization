@@ -5,12 +5,12 @@
 	<title>Global Stunting, Children under Five</title>
 	  <style>
 	  #wrapper {
-	  	width: 1200px;
+	  	width: 1400px;
 	  	margin: -20px auto 0;
 	  }
 	  #map {
-	  	width: 1000px;
-	  	height: 580px;
+	  	width: 1200px;
+	  	height: 620px;
 	  	position: relative;
 	  }
 	  .stroke {
@@ -38,7 +38,7 @@
 	  	top: 15px;
 	  }
 	  #play {
-	  	left: 175px;
+	  	left: 125px;
     	border: none;
     	border-radius: 12px;
     	color: white;
@@ -52,7 +52,7 @@
     	font-size: 22px;
 	  }
 	  #clock {
-	  	left: 300px;
+	  	left: 250px;
 	  	font: helvetica;
 	  	font-size: 60px;
 	  	opacity: .5;
@@ -60,9 +60,8 @@
 	  div.tooltip {	
 	    position: absolute;			
 	    text-align: center;			
-	    width: 75px;										
 	    padding: 2px;				
-	    font: 12px sans-serif;		
+	    font: 16px sans-serif;		
 	    color: white;
 	    background: grey;
 	    opacity: .9;	
@@ -99,10 +98,10 @@
 
 	  	function setMap() {
 	 
-	  		width = 1000, height = 580;
+	  		width = 1400, height = 620;
 	  	
 		  	var projection = d3.geoMercator()
-		  							.scale(200) 
+		  							.scale(250) 
 		  							.translate([width / 2.2, height / 1.9])
 		  							.precision(.1);
 
@@ -118,7 +117,7 @@
 
 			svg.append("g")
   				.attr("class", "legendLinear")
-  				.attr("transform", "translate(250,508)");
+  				.attr("transform", "translate(400,508)");
 
 			var legendLinear = d3.legendColor()
   				.shapeWidth(45)
@@ -172,11 +171,6 @@
 	  	}
 
 	  	function map_data(globe) {
-
-		  	// Define the div for the tooltip
-			// var tooltip = d3.select("body").append("div")	
-			//     .attr("class", "tooltip")				
-			//     .style("opacity", 0);
 
 			var tooltip = d3.select('body').append('div')
             	.attr('class', 'hidden tooltip');
@@ -232,18 +226,18 @@
 	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >= 1983 && attributeArray[i] <= attributeArray[currentAttribute]) {
 	  												return getColor(d.properties[attributeArray[i]], dataRange)}
 	  								}
-	  								// if(attributeArray[currentAttribute] == 1983) {
-	  								// 	if(d.properties[attributeArray[currentAttribute]] !=0) {
-	  								// 		return getColor(d.properties[attributeArray[currentAttribute]], dataRange)
-	  								// 	}
-	  								// 	else {
-	  								// 		return 0
-	  								// 	}
-	  								// }
 	  							});
-	  							
+			j = 0
+			if(attributeArray[currentAttribute] == 1983) {
+				j += 1
+			}
+			if(j == 1) {
+				d3.selectAll('.country').remove();
+				loadData();
+				map_data();
+				}	
+			}		
 	  		// console.log(svg.selectAll('.country'))
-	  	}
 
 	  	function getColor(valueIn, valuesIn) {
 
@@ -276,13 +270,24 @@
 	  					clearInterval(timer);
 	  					d3.select(this).html('Play');
 	  					playing = false;
-	  				}
-
+	  				}	
 	  			});
 	  	} 
 
 	  	window.onload = init();
 
   </script>
+
+  <svg width="500" height="250">
+  	<text x="400" y="600" font-family="helvetica" font-size="16px" fill="black">
+  		"Unicef May 2016 stunting disparity: Stunting prevalence in children under 5 (%) by area of residence"
+
+  		Severe Wasting: Percentage of children aged 0–59 months who are below minus three standard deviations from median weight-for-height of the WHO Child Growth Standards.
+# Wasting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median weight-for-height of the WHO Child Growth Standards.
+# Overweight – Moderate and severe: Percentage of children aged 0-59 months who are above two standard deviations from median weight-for-height of the WHO Child Growth Standards. 
+# Stunting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median height-for-age of the WHO Child Growth Standards.
+# Underweight – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median weight-for-age of the World Health Organization (WHO) Child Growth Standards.
+
+  </svg>
 </body>
 </html>

@@ -1,17 +1,42 @@
 Readme 
 
-Data similar to that used for http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html
-But the excel files were cleaner and easier to parse.  This is a decent data exploration tool, but doesn't tell much of a story. 
-http://apps.who.int/gho/data/node.main.1097?lang=en
+Visualization of  While normally first to grab a torch and pitchfork and take a run at Excel, UNICEF's single flat file contained more data for less work than both fancy, bespoke data explorers at http://apps.who.int/gho/data/node.main.1097?lang=en and https://public.tableau.com/profile/publish/GNR2015/2015GNR#!/publish-confirm. 
 
-UNICEF had better datasets, despite being in Excel.
+Data similar to that used for http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html
+But UNICEF's excel files were cleaner and easier to parse, and they already included names and ISO country codes, which will also save time.  
+
+This is a decent data exploration tool, but doesn't tell much of a story. 
+http://apps.who.int/gho/data/node.main.1097?lang=en (click through to "interactive graph").  This could use some sprucing up, and I especially wanted to see how stunting has developed over time.  
+
+Why add yet another visualization of childhood malnutrition to the pile? None of the visualizations looked at the trends over time, and I found it difficult to get a sense of how countries and regions compared to one another over time. Another interesting observation is seeing these vital humanitarian measures come "online," as more countries began reporting data. The animated timeseries choropleth is live at the following link. 
+
+Live at [URL TK] Use Jekyll/Github pages. 
+
+If the visualization doesn't fit the browser window correctly, maximize the window to fill the screen. 
+
+Why stunting? Stunting is irrevocable damage malnutrition inflicts on children, and once stunted, children will likely never fully recover.  In human terms, the problem still extends to hundreds of millions of people around the world, though some fervent optimists have still find cause to celebrate the "golden age" the world is enterting. Aldous Huxley once said that doing good was a question of "individual moral craftsmanship," that we must build our own golden age rather than treating it as fait accompli or fatalistically assuming that the human world, the Anthropocene era, must necessarily include food privation.  
+
+Certainly the number of stunted children has gone down significantly on an aggregate basis, though it is equally true that this steep gain has now flattened out.  We can see through the choropleth that stunting has been reduced, though when we segment by region and 
+
+
+
+*Ggplotly of old R chart* HungerPlot.R - put code into Jupyter
+/Users/andrewpederson/Rfiles/DataProducts/HungerDeck/HungerPlot.R
+
+What might explain this? The Green Revolution introduced across the board yield explosions in grain, courtesy of Norman Borlaug and billions in funding and subsidies for farmer development. Indeed, the World Bank has found that investments in agriculture can yield as much as 200 percent return on investment, dollar for dollar. We see the results of these programs in India and Pakistan, though it's notable that 
 
 UNICEF report: 
 http://data.unicef.org/corecode/uploads/document6/uploaded_pdfs/corecode/JME-2015-edition-Sept-2015_203.pdf
 This is a story, but .pdfs are static and take effort for humans to read. The two should work together. These infographics are trying to be user friendly, but no reason to dumb things down this much - most of the real data is obscured by the graphics.
 
+The appeal to corporate CSR motivations to invest in nutritional programs to improve marketing is an interesting focus away from the program beneficiaries in the field. To be fair, the report website has a pretty good-looking Tableau instance: http://globalnutritionreport.org/the-data/data-and-visualization-platform/. However, downloading the dataset is frustrating, since it contains only Tableau formatting references, and no numbers. There is a spreadsheet to be had clicking through to https://dataverse.harvard.edu/dataset.xhtml?persistentId=doi:10.7910/DVN/MUOX19, though the list is also confusing.  As an added headache, there are several different variables in each record, with a bunch of categorical strings to muck through once we finally have 001_2015GNRDataset_Child-Adult-Nutrition.xls. 
+
+Further, from what we know from global impact evaluations, we are off target to meet our goals.  From Promise to Impact: Ending
 Global nutrition report: 
 http://ebrary.ifpri.org/utils/getfile/collection/p15738coll2/id/130354/filename/130565.pdf
+*Screenshot Page 16* 
+https://www.dropbox.com/s/p2ff7qrmz92t1lw/Screenshot%202016-09-23%2015.30.39.png?dl=0 
+
 
 Had to reinstall node and npm, since some dependencies were borked
 http://stackoverflow.com/questions/11177954/how-do-i-completely-uninstall-node-js-and-reinstall-from-beginning-mac-os-x

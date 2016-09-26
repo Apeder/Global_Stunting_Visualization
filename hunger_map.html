@@ -65,18 +65,23 @@
 	    color: white;
 	    background: grey;
 	    opacity: .9;	
-	    border: 0px;		
+	    border: 2px;		
 	    border-radius: 8px;			
 	    pointer-events: none;			
 		}
     	.hidden {
         display: none;
     	}
+    	.tab { 
+    	margin-left: 400px;
+    	margin-right: 100px; 
+    	}
 	  </style>
 	</head>
 
 	<body>
 		<div id="wrapper">
+			<h1><center>Stunting Prevalence (%), Children under Five</center></h1>
 			<div id="map"></div>
 			<button id="play">Play</button>
 			<span id="clock">Year</span>
@@ -85,17 +90,20 @@
 	  <script src="http://d3js.org/d3.v4.min.js"></script>
 	  <script src="https://d3js.org/queue.v1.min.js"></script>
 	  <script src="https://d3js.org/topojson.v1.min.js"></script>
-	  <script src="./d3-legend.min.js"></script>
+	  <script src="JS_files/d3-legend.min.js"></script>
 	  <script type="text/javascript">
 	  	
+	  	// Set global variables to size the map, create the attribute array to track the year and set the map to 0 on load
 	  	var width, height, attributeArray = [], projection, currentAttribute = 0, playing = false, path, svg;
 
+	  	// Initialization function called when the page loads calls a function to draw the base map, then another to animate it
 	  	function init() {
 
 	  		setMap();
 	  		animateMap();
 	  	}
 
+	  	// Defines the dimensions of the map, its projection and draws the legend on a linear scale
 	  	function setMap() {
 	 
 	  		width = 1400, height = 620;
@@ -117,7 +125,7 @@
 
 			svg.append("g")
   				.attr("class", "legendLinear")
-  				.attr("transform", "translate(400,508)");
+  				.attr("transform", "translate(400,550)");
 
 			var legendLinear = d3.legendColor()
   				.shapeWidth(45)
@@ -132,14 +140,17 @@
 
 	  	}
 
+	  	// Loads the JSON geo shapefile and the data CSV
 	  	function loadData() {
 	  
 	  		queue()
-	  			.defer(d3.json, "worldtopo.json")
+	  			.defer(d3.json, "Geo_files/worldtopo.json")
 	  			.defer(d3.csv, "Data/clean_analysis/world_stunting.csv")
 	  			.await(processData);
 	  	}
 
+	  	// Loops through the JSON geo shapefile ("globe") to collect the geometries, then loops through the data CSV ("world_info") to match geometries with data records by three letter ISO country codes. The third loop then pushes all the data variables to each country object's properties array and populates attributeArray with each year containing data. The last loop then removes all countries whose three letter ISO codes aren't in both the shapefile and data file.  
+	  	
 	  	function processData(error,globe,world_info) {
 	  		var countries = globe.objects.countries_not_ata.geometries;
 	  		for (var i in countries) {
@@ -169,24 +180,24 @@
 	  		d3.select('#clock').html(attributeArray[currentAttribute]);
 	  		map_data(globe);	
 	  	}
-
+ 	
+	  	// Draw tootips and countries using the JSON arrays created above. 
 	  	function map_data(globe) {
 
 			var tooltip = d3.select('body').append('div')
             	.attr('class', 'hidden tooltip');
 
-	  		svg.selectAll(".country").filter(function(d) {return d.properties.matched=true})
+	  		svg.selectAll(".country")
 	  			.data(topojson.feature(globe, globe.objects.countries_not_ata).features)
 	  			.enter().append("path")
 	  			.attr("class", "country")
-	  			.attr("id", function(d) { return "code_" +d.properties.id; }, true)
 	  			.attr('d', path)
 	  			.on('mousemove', function(d) {
                     var mouse = d3.mouse(svg.node()).map(function(d) {
                         return parseInt(d);
                     });
                     tooltip.classed('hidden', false)
-                        .attr('style', 'left:' + (mouse[0] + 120) + 'px; top:' + (mouse[1] - 40) + 'px')
+                        .attr('style', 'left:' + (mouse[0] + 90) + 'px; top:' + (mouse[1] - 40) + 'px')
                         .html(function() {
                         	var name = d.properties.admin;
                         	years = []
@@ -214,6 +225,7 @@
 	  			});
 	  		}	
 	  	
+	  	// When animating, only years with non-zero values are updated, and if no value for the currentAttribute year exists, then the country is filled using the latest non-zero value available after 1983. Once the animation sequence attributeArray hits 1983 for the second time, the map resets. 
 	  	function sequenceMap() {
 
 	  		var dataRange = [0,75] 
@@ -239,6 +251,7 @@
 			}		
 	  		// console.log(svg.selectAll('.country'))
 
+	  	// Returns color opacity value based on numeric value for that year on a linear scale
 	  	function getColor(valueIn, valuesIn) {
 
 	  		var color = d3.scaleLinear()
@@ -248,6 +261,7 @@
 		  	return color(valueIn);
 	  	}
 	  	
+	  	// Map initializes with playing == false and currentAttribute == 0. When the play button is clicked, the timer starts an interval and begins incrementing currentAttribute by 1 each time the sequenceMap function is called. When Stop is clicked, the interval is cleared, and playing is set back to false. 
 	  	function animateMap() {
 
 	  		var timer; 
@@ -278,16 +292,7 @@
 
   </script>
 
-  <svg width="500" height="250">
-  	<text x="400" y="600" font-family="helvetica" font-size="16px" fill="black">
-  		"Unicef May 2016 stunting disparity: Stunting prevalence in children under 5 (%) by area of residence"
-
-  		Severe Wasting: Percentage of children aged 0–59 months who are below minus three standard deviations from median weight-for-height of the WHO Child Growth Standards.
-# Wasting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median weight-for-height of the WHO Child Growth Standards.
-# Overweight – Moderate and severe: Percentage of children aged 0-59 months who are above two standard deviations from median weight-for-height of the WHO Child Growth Standards. 
-# Stunting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median height-for-age of the WHO Child Growth Standards.
-# Underweight – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median weight-for-age of the World Health Organization (WHO) Child Growth Standards.
-
-  </svg>
+	<p class="tab">Stunting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median height-for-age of the WHO Child Growth Standards.</p>
+	<p class="tab">Data from UNICEF, May 2016: "Stunting Disparities by Residence and Wealth Quintile" at http://data.unicef.org/nutrition/malnutrition.html</p>
 </body>
 </html>

@@ -1,6 +1,8 @@
 Readme 
 
-Visualization of  While normally first to grab a torch and pitchfork and take a run at Excel, UNICEF's single flat file contained more data for less work than both fancy, bespoke data explorers at http://apps.who.int/gho/data/node.main.1097?lang=en and https://public.tableau.com/profile/publish/GNR2015/2015GNR#!/publish-confirm. 
+Visualization of "Stunting Disparities by Residence and Wealth Quintile" at http://data.unicef.org/nutrition/malnutrition.html. 
+
+While normally first to grab a torch and pitchfork and take a run at Excel, UNICEF's single flat file contained more data for less work than both fancy, bespoke data explorers at http://apps.who.int/gho/data/node.main.1097?lang=en and https://public.tableau.com/profile/publish/GNR2015/2015GNR#!/publish-confirm. 
 
 Data similar to that used for http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html
 But UNICEF's excel files were cleaner and easier to parse, and they already included names and ISO country codes, which will also save time.  

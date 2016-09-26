@@ -1,0 +1,298 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+	<meta charset="utf-8">
+	<title>Global Stunting, Children under Five</title>
+	  <style>
+	  #wrapper {
+	  	width: 1400px;
+	  	margin: -20px auto 0;
+	  }
+	  #map {
+	  	width: 1200px;
+	  	height: 620px;
+	  	position: relative;
+	  }
+	  .stroke {
+	  	fill: none;
+	  	stroke: #888;
+	  	stroke-width: 2px;
+	  }
+	  .fill {
+	  	fill: #fff;
+	  }
+	  .land {
+	  	fill: #222;
+	  }
+	  .boundary {
+	  	fill: none;
+	  	stroke: #fff;
+	  	stroke-width: .5px;
+	  }
+	  .country {
+	  	fill: red;
+	  	stroke: white;
+	  }
+	  #play, #clock {
+	  	position: absolute;
+	  	top: 15px;
+	  }
+	  #play {
+	  	left: 125px;
+    	border: none;
+    	border-radius: 12px;
+    	color: white;
+    	background-color: #FF0000;
+    	opacity: .75;
+    	padding: 15px 32px;
+    	text-align: center;
+    	text-decoration: none;
+    	font: helvetica;
+    	display: inline-block;
+    	font-size: 22px;
+	  }
+	  #clock {
+	  	left: 250px;
+	  	font: helvetica;
+	  	font-size: 60px;
+	  	opacity: .5;
+	  }
+	  div.tooltip {	
+	    position: absolute;			
+	    text-align: center;			
+	    padding: 2px;				
+	    font: 16px sans-serif;		
+	    color: white;
+	    background: grey;
+	    opacity: .9;	
+	    border: 2px;		
+	    border-radius: 8px;			
+	    pointer-events: none;			
+		}
+    	.hidden {
+        display: none;
+    	}
+    	.tab { 
+    	margin-left: 400px;
+    	margin-right: 100px; 
+    	}
+	  </style>
+	</head>
+
+	<body>
+		<div id="wrapper">
+			<h1><center>Stunting Prevalence (%), Children under Five</center></h1>
+			<div id="map"></div>
+			<button id="play">Play</button>
+			<span id="clock">Year</span>
+		</div>
+
+	  <script src="http://d3js.org/d3.v4.min.js"></script>
+	  <script src="https://d3js.org/queue.v1.min.js"></script>
+	  <script src="https://d3js.org/topojson.v1.min.js"></script>
+	  <script src="JS_files/d3-legend.min.js"></script>
+	  <script type="text/javascript">
+	  	
+	  	// Set global variables to size the map, create the attribute array to track the year and set the map to 0 on load
+	  	var width, height, attributeArray = [], projection, currentAttribute = 0, playing = false, path, svg;
+
+	  	// Initialization function called when the page loads calls a function to draw the base map, then another to animate it
+	  	function init() {
+
+	  		setMap();
+	  		animateMap();
+	  	}
+
+	  	// Defines the dimensions of the map, its projection and draws the legend on a linear scale
+	  	function setMap() {
+	 
+	  		width = 1400, height = 620;
+	  	
+		  	var projection = d3.geoMercator()
+		  							.scale(250) 
+		  							.translate([width / 2.2, height / 1.9])
+		  							.precision(.1);
+
+		  	path = d3.geoPath().projection(projection);
+
+		  	svg = d3.select("#map").append("svg")
+		  		.attr("width", width)
+		  		.attr("height", height);
+
+		  	var linear = d3.scaleLinear()
+  				.domain([0,75])
+  				.range(["rgb(255, 255, 255)", "rgb(255, 0, 0)"]);
+
+			svg.append("g")
+  				.attr("class", "legendLinear")
+  				.attr("transform", "translate(400,550)");
+
+			var legendLinear = d3.legendColor()
+  				.shapeWidth(45)
+  				.cells(15)
+  				.orient('horizontal')
+  				.scale(linear);
+
+			svg.select(".legendLinear")
+  				.call(legendLinear);
+
+		  	loadData();
+
+	  	}
+
+	  	// Loads the JSON geo shapefile and the data CSV
+	  	function loadData() {
+	  
+	  		queue()
+	  			.defer(d3.json, "Geo_files/worldtopo.json")
+	  			.defer(d3.csv, "Data/clean_analysis/world_stunting.csv")
+	  			.await(processData);
+	  	}
+
+	  	// Loops through the JSON geo shapefile ("globe") to collect the geometries, then loops through the data CSV ("world_info") to match geometries with data records by three letter ISO country codes. The third loop then pushes all the data variables to each country object's properties array and populates attributeArray with each year containing data. The last loop then removes all countries whose three letter ISO codes aren't in both the shapefile and data file.  
+	  	
+	  	function processData(error,globe,world_info) {
+	  		var countries = globe.objects.countries_not_ata.geometries;
+	  		for (var i in countries) {
+	  			for (var j in world_info) {
+	  				if(countries[i].properties.id == world_info[j].ISO_country) {
+	  					countries[i].properties.matched = true
+	  					// console.log(world_info[j].ISO_country, j, i)
+	  					for(var k in world_info[j]) {
+	  						if(k != 'ISO_country') {
+	  							if(attributeArray.indexOf(k) == -1) {
+	  								attributeArray.push(k)
+	  							}
+	  							countries[i].properties[k] = Number(world_info[j][k])
+	  						}
+	  					}
+	  					break;
+	  				}
+	  			}
+	  		}
+	  		
+	  		for(i=countries.length; i--;) {
+		  		if (!countries[i].properties.matched) {
+		  				countries.splice(i,1)
+		  				}
+		  		}
+	  		// console.log(countries)		
+	  		d3.select('#clock').html(attributeArray[currentAttribute]);
+	  		map_data(globe);	
+	  	}
+ 	
+	  	// Draw tootips and countries using the JSON arrays created above. 
+	  	function map_data(globe) {
+
+			var tooltip = d3.select('body').append('div')
+            	.attr('class', 'hidden tooltip');
+
+	  		svg.selectAll(".country")
+	  			.data(topojson.feature(globe, globe.objects.countries_not_ata).features)
+	  			.enter().append("path")
+	  			.attr("class", "country")
+	  			.attr('d', path)
+	  			.on('mousemove', function(d) {
+                    var mouse = d3.mouse(svg.node()).map(function(d) {
+                        return parseInt(d);
+                    });
+                    tooltip.classed('hidden', false)
+                        .attr('style', 'left:' + (mouse[0] + 90) + 'px; top:' + (mouse[1] - 40) + 'px')
+                        .html(function() {
+                        	var name = d.properties.admin;
+                        	years = []
+                        	for(var i in attributeArray) {
+                        		if(d.properties[attributeArray[i]] !=0) {
+                        			years.push("<br>", attributeArray[i], d.properties[attributeArray[i]], "%")
+                        		}
+                        	}
+                        	return name + years.join(" ")
+                        })
+                })
+                .on('mouseout', function() {
+                    tooltip.classed('hidden', true);
+	  			});	
+         
+	  		var dataRange = [0,75] 
+
+	  		d3.selectAll('.country')
+	  			.attr('fill-opacity', function(d) {
+	  				if(d.properties[attributeArray[currentAttribute]] != 0) {
+	  					return getColor(d.properties[attributeArray[currentAttribute]], dataRange)}
+	  				else {
+	  					return 0
+	  				}
+	  			});
+	  		}	
+	  	
+	  	// When animating, only years with non-zero values are updated, and if no value for the currentAttribute year exists, then the country is filled using the latest non-zero value available after 1983. Once the animation sequence attributeArray hits 1983 for the second time, the map resets. 
+	  	function sequenceMap() {
+
+	  		var dataRange = [0,75] 
+
+	  		d3.selectAll('.country').filter(function(d) {return d.properties[attributeArray[currentAttribute]] != 0})
+	  								.transition()
+	  								.duration(800)
+	  								.attr('fill-opacity', function(d) {
+	  										for(var i=attributeArray.length; i--;) {
+	  											if(d.properties[attributeArray[i]] != 0 && attributeArray[i] >= 1983 && attributeArray[i] <= attributeArray[currentAttribute]) {
+	  												return getColor(d.properties[attributeArray[i]], dataRange)}
+	  								}
+	  							});
+			j = 0
+			if(attributeArray[currentAttribute] == 1983) {
+				j += 1
+			}
+			if(j == 1) {
+				d3.selectAll('.country').remove();
+				loadData();
+				map_data();
+				}	
+			}		
+	  		// console.log(svg.selectAll('.country'))
+
+	  	// Returns color opacity value based on numeric value for that year on a linear scale
+	  	function getColor(valueIn, valuesIn) {
+
+	  		var color = d3.scaleLinear()
+		  		.domain([valuesIn[0],valuesIn[1]])
+		  		.range([0, 1]);
+
+		  	return color(valueIn);
+	  	}
+	  	
+	  	// Map initializes with playing == false and currentAttribute == 0. When the play button is clicked, the timer starts an interval and begins incrementing currentAttribute by 1 each time the sequenceMap function is called. When Stop is clicked, the interval is cleared, and playing is set back to false. 
+	  	function animateMap() {
+
+	  		var timer; 
+	  		d3.select('#play')
+	  			.on('click', function() {
+	  				if(playing == false) {
+	  					timer = setInterval(function() {
+	  						if(currentAttribute < attributeArray.length-1) {
+	  							currentAttribute +=1;
+	  						} else {
+	  							currentAttribute = 0;
+	  						}
+	  						sequenceMap();
+	  						d3.select('#clock').html(attributeArray[currentAttribute]);
+	  					}, 2000);
+
+	  					d3.select(this).html('Stop');
+	  					playing = true;
+	  				} else {
+	  					clearInterval(timer);
+	  					d3.select(this).html('Play');
+	  					playing = false;
+	  				}	
+	  			});
+	  	} 
+
+	  	window.onload = init();
+
+  </script>
+
+	<p class="tab">Stunting – Moderate and severe: Percentage of children aged 0–59 months who are below minus two standard deviations from median height-for-age of the WHO Child Growth Standards.</p>
+	<p class="tab">Data from UNICEF, May 2016: "Stunting Disparities by Residence and Wealth Quintile" at http://data.unicef.org/nutrition/malnutrition.html</p>
+</body>
+</html>

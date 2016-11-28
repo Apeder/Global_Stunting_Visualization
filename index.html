@@ -101,7 +101,7 @@
     	margin-right: 100px; 
     }
     .ticks {
-  font: 10px sans-serif;
+  		font: 10px sans-serif;
 	}
 	.track,
 	.track-inset,
@@ -199,12 +199,12 @@
 			svg.select(".legendLinear")
   				.call(legendLinear);
 
-  			var x = d3.scaleLinear()
+  			x = d3.scaleLinear()
 			    .domain([1983, 2015])
 			    .range([50, width - 50])
 			    .clamp(true);
 
-			var slider = svg.append("g")
+			slider = svg.append("g")
 			    .attr("class", "slider")
 			    .attr("transform", "translate(0,600)");
 
@@ -216,9 +216,6 @@
 			    .attr("class", "track-inset")
 			  .select(function() { return this.parentNode.appendChild(this.cloneNode(true)); })
 			    .attr("class", "track-overlay")
-			    .call(d3.drag()
-			        .on("start.interrupt", function() { slider.interrupt(); })
-			        .on("start drag", function() { hue(x.invert(d3.event.x)); }));
 
 			slider.insert("g", ".track-overlay")
 			    .attr("class", "ticks")
@@ -230,7 +227,7 @@
 			    .attr("text-anchor", "middle")
 			    .text(function(d) { return d});
 
-			var handle = slider.insert("circle", ".track-overlay")
+			handle = slider.insert("circle", ".track-overlay")
 			    .attr("class", "handle")
 			    .attr("r", 9);
 
@@ -238,15 +235,7 @@
 				.duration(750)
 				.tween("year", function() {
 				    var i = d3.interpolate(1983, 2015);
-				    // currentAttribute = i;
-				    // sequenceMap();
-				    // return function(t) { hue(i(t)); };
 				});
-
-			function hue(h) {
-				handle.attr("cx", x(h));
-				currentAttribute = h;
-			}
 
 		 loadData();
 
@@ -264,7 +253,7 @@
 	  	// Loops through the JSON geo shapefile ("globe") to collect the geometries, then loops through the data CSV ("world_info") to match geometries with data records by three letter ISO country codes. The third loop then pushes all the data variables to each country object's properties array and populates attributeArray with each year containing data. The last loop then removes all countries whose three letter ISO codes aren't in both the shapefile and data file.  
 	  	
 	  	function processData(error,globe,world_info) {
-	  		var countries = globe.objects.countries_not_ata.geometries;
+	  		countries = globe.objects.countries_not_ata.geometries;
 	  		for (var i in countries) {
 	  			for (var j in world_info) {
 	  				if(countries[i].properties.id == world_info[j].ISO_country) {
@@ -326,7 +315,7 @@
                     tooltip.classed('hidden', true);
 	  			})		
 
-	  		var dataRange = [0,75] 
+	  		dataRange = [0,75] 
 
 	  		d3.selectAll('.country')
 	  			.attr('fill-opacity', function(d) {
@@ -388,6 +377,9 @@
 	  						} else {
 	  							currentAttribute = 0;
 	  						}
+	  						// d3.selectAll('.country').remove();
+	  						// loadData();
+	  						// map_data();
 	  						sequenceMap();
 	  						d3.select('#clock').html(attributeArray[currentAttribute]);
 	  					}, 2000);
@@ -400,6 +392,38 @@
 	  					playing = false;
 	  				}	
 	  			});
+
+	  		d3.select('.track-overlay').call(d3.drag()
+			        .on("start.interrupt", function() { slider.interrupt(); })
+			        .on("start drag", function() { update(x.invert(d3.event.x)); }));
+
+	  		function update(h) {
+				handle.attr("cx", x(h));
+				// console.log(Math.round(h));
+				attributeArray[currentAttribute] = Math.round(h);
+
+				d3.selectAll('.country').filter(function(d) {return d.properties[attributeArray[currentAttribute]] != 0})
+		  			.attr('fill-opacity', function(d) {
+	  							for(var i=attributeArray.length; i--;) {
+	  							if(attributeArray[i] >= 1983 && attributeArray[i] <= attributeArray[currentAttribute]) {
+	  									return getColor(d.properties[attributeArray[i]], dataRange)}		
+	  								}
+	  							});
+		  			// .attr('fill-opacity', function(d) {
+		  			// 	if(d.properties[attributeArray[currentAttribute]] != 0) {
+		  			// 		return getColor(d.properties[attributeArray[currentAttribute]], dataRange)}
+		  			// 	else {
+		  			// 		return 0
+		  			// 	}
+		  			// });
+
+				// console.log(currentAttribute)
+				// return currentAttribute;
+				// loadData();
+				// sequenceMap();
+				d3.select('#clock').html(attributeArray[currentAttribute]);
+				// map_data();
+			}
 	  	} 
 
 	  	window.onload = init();

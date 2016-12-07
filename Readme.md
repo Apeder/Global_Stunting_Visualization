@@ -4,7 +4,7 @@ Visualizing ["Stunting Disparities by Residence and Wealth Quintile"](http://dat
 Summary - UNICEF Wins Open Data Sourcing Challenge
 ------
 
-While normally first to grab a torch and pitchfork and take a run at Excel, my conclusion was UNICEF's single flat file contained more data for less work than both fancy, bespoke data explorers from the [World Health Organization](http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html) and [International Food Policy Research Institute](https://public.tableau.com/profile/publish/GNR2015/2015GNR#!/publish-confirm). UNICEF's excel files were cleaner and easier to parse, and they already included country names and ISO country codes, which will also saved time.
+While normally first to grab a torch and pitchfork to take a run at Excel, UNICEF's single flat file contained more data for less work than both fancy, bespoke data explorers from the [World Health Organization](http://gamapserver.who.int/gho/interactive_charts/mdg1/atlas.html) and [International Food Policy Research Institute](https://public.tableau.com/profile/publish/GNR2015/2015GNR#!/publish-confirm). UNICEF's excel files were cleaner and easier to parse, and they already included country names and ISO country codes, which will also saved time.
 
 In this case, Google's algorithm did a good job providing quick access to good resources to find quality, accessible data. UNICEF, WHO and Wikipedia get top billing, as they should. 
 
@@ -43,7 +43,7 @@ https://apeder.github.io/Global_Stunting_Visualization/
 
 Primarily, we can see that although stunting has become somewhat less prevalent over time, it remains widespread around the world.  As well, we can also see clearly that data collection has not been regular for many countries, so global trends are more difficult to describe. 
 
-GGplotly version of distribution over time.  We blunted the bulge, though progress is flattening, and new data on sugar's link to chronic obesity and diabetes is concerning.   
+GGplotly version of distribution over time.  We blunted the bulge, though progress is flattening, and new data on sugar's link to chronic obesity and diabetes is concerning.
 
 Design
 ----
@@ -51,6 +51,13 @@ Design
 Why stunting? Stunting is irrevocable damage malnutrition inflicts on children, and once stunted, children will likely never fully recover.  In human terms, the problem still extends to hundreds of millions of people around the world, though some fervent optimists have still find cause to celebrate the "golden age" the world is entering. 
 
 As previous visualizations don't include a time dimension, nor allow global comparisons, the primary design criteria was to show how the rate of stunting has changed globally over time. 
+
+![stunting_cartogram_v2](https://www.dropbox.com/s/y8ob2res7cp1qwu/Screenshot%202016-12-06%2011.25.10.png?dl=0)
+
+Also found that a choropleth map using exact geographic boundaries is difficult to interpret. Decided to try a global version of 538's continuous hexagonal dorling cartogram: http://projects.fivethirtyeight.com/2016-election-forecast/. This is to account for the size distortion geographic area introduces (larger states/countries attract more attention than smaller, for example).  Instead, area within the unit of measure's geographic shapefile is determined by a mesh of continuous hexagons.This is a continuous hexagonal dorling cartogram, much like 538's electoral map of the U.S.
+
+
+The other major visual dimension, color, encodes the intensity of impact as a percentage of total population on a range between purple and red. Red is an important negative signal, and purple replaces green, which could be misinterpreted as a positive signal. 
 
 Feedback
 -----
@@ -111,3 +118,12 @@ Map pan and zoom
 Slider control
 https://bl.ocks.org/mbostock/6452972
 http://bl.ocks.org/d3noob/10632804
+
+Hexagonal cartogram (tilegram?):
+http://pitchinteractive.com/latest/tilegrams-more-human-maps/
+https://bost.ocks.org/mike/example/
+https://bl.ocks.org/mbostock/5249328
+http://christopheviau.com/d3list/
+view-source:http://www.nytimes.com/interactive/2013/04/08/business/global/asia-map.html?_r=0
+
+Worth pointing out that Mike Bostock's philosophy of openly providing code samples with working examples made the learning process for d3 very enjoyable.
